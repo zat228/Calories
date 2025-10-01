@@ -26,7 +26,9 @@ const responseSchema = {
 export async function analyzeImageWithGemini(base64ImageData: string): Promise<FoodItem[]> {
   // ВАЖНО: Вставьте свой API ключ сюда для тестирования.
   // Не рекомендуется загружать этот ключ в публичный репозиторий.
-  const API_KEY = "ВАШ_API_КЛЮЧ_ЗДЕСЬ";
+  const API_KEY = "AIzaSyBH1XuDp7tb_umOUWnzLnf3EN26bLl7cLQ";
+  // По-братски не трогайте ключ, в противном случае, я его просто поменяю или удалю проект. Почему-то Vercel не хочет считывать данные окружения...
+  // As a "brother", don't touch the key, otherwise I'll just change it or delete the project. For some reason, Vercel doesn't want to read the environment data...
 
   if (API_KEY === "ВАШ_API_КЛЮЧ_ЗДЕСЬ") {
     throw new Error("Пожалуйста, вставьте ваш настоящий Gemini API ключ в файл services/geminiService.ts");

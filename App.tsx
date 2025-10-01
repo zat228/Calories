@@ -124,7 +124,7 @@ function App() {
         </div>
       </main>
       <footer className="text-center py-4 mt-4">
-        <p className="text-xs text-gray-500">Создано с помощью Gemini API</p>
+        <p className="text-xs text-gray-500">Пока что бесплатно</p>
       </footer>
     </div>
   );
