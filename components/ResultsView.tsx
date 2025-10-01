@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
-import { AnalysisState, FoodItem } from '../types.ts';
-import { LoaderIcon } from './icons/LoaderIcon.tsx';
-import { RetryIcon } from './icons/RetryIcon.tsx';
-import { ListIcon } from './icons/ListIcon.tsx';
+import { AnalysisState, FoodItem } from '../types';
+import { LoaderIcon } from './icons/LoaderIcon';
+import { RetryIcon } from './icons/RetryIcon';
+import { ListIcon } from './icons/ListIcon';
 
 interface ResultsViewProps {
   imageSrc: string;
