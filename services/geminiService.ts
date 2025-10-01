@@ -1,4 +1,4 @@
-import { FoodItem } from '../types';
+import { FoodItem } from '../types.ts';
 
 export async function analyzeImageWithGemini(base64ImageData: string): Promise<FoodItem[]> {
   try {
