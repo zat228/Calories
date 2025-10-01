@@ -79,8 +79,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     });
 
-    const jsonText = response.text.trim();
-    const data = JSON.parse(jsonText);
+    const jsonText = response.text;
+    if (!jsonText) {
+      console.error("Gemini API response did not contain text.", JSON.stringify(response, null, 2));
+      throw new Error("Не удалось получить текстовый ответ от Gemini API.");
+    }
+    
+    const data = JSON.parse(jsonText.trim());
 
     if (!Array.isArray(data)) {
       throw new Error("API response is not an array");
@@ -90,6 +95,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   } catch (error) {
     console.error("Error in /api/analyze:", error);
-    return res.status(500).json({ message: 'Не удалось проанализировать изображение с помощью Gemini API.' });
+    const errorMessage = error instanceof Error ? error.message : 'Не удалось проанализировать изображение с помощью Gemini API.';
+    return res.status(500).json({ message: errorMessage });
   }
 }
