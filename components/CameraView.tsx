@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { CameraIcon } from './icons/CameraIcon';
+import { CameraIcon } from './icons/CameraIcon.tsx';
 
 interface CameraViewProps {
   videoRef: React.RefObject<HTMLVideoElement>;

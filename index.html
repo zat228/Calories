@@ -1,11 +1,12 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF--8" />
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Calorie Cam</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Babel Standalone for in-browser TSX/JSX compilation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script>
       tailwind.config = {
         theme: {
@@ -36,6 +37,7 @@
 </head>
   <body class="bg-brand-bg text-brand-text-primary">
     <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
+    <!-- Changed script type to "text/babel" and added presets -->
+    <script type="text/babel" data-type="module" data-presets="react,typescript" src="/index.tsx"></script>
   </body>
 </html>

@@ -1,9 +1,8 @@
-
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { analyzeImageWithGemini } from './services/geminiService';
-import { FoodItem, AnalysisState } from './types';
-import { CameraView } from './components/CameraView';
-import { ResultsView } from './components/ResultsView';
+import { analyzeImageWithGemini } from './services/geminiService.ts';
+import { FoodItem, AnalysisState } from './types.ts';
+import { CameraView } from './components/CameraView.tsx';
+import { ResultsView } from './components/ResultsView.tsx';
 
 function App() {
   const [analysisState, setAnalysisState] = useState<AnalysisState>(AnalysisState.Idle);
