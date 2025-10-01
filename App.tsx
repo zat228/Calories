@@ -77,7 +77,8 @@ function App() {
       setAnalysisState(AnalysisState.Success);
     } catch (err) {
       console.error(err);
-      setError('Не удалось проанализировать изображение. Пожалуйста, попробуйте еще раз.');
+      const errorMessage = err instanceof Error ? err.message : 'Произошла неизвестная ошибка.';
+      setError(errorMessage);
       setAnalysisState(AnalysisState.Error);
     }
   };

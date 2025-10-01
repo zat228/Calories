@@ -2,14 +2,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { FoodItem } from '../types';
 
-const API_KEY = process.env.API_KEY;
-
-if (!API_KEY) {
-  throw new Error("API_KEY environment variable not set");
-}
-
-const ai = new GoogleGenAI({ apiKey: API_KEY });
-
 const responseSchema = {
   type: Type.ARRAY,
   items: {
@@ -33,6 +25,14 @@ const responseSchema = {
 };
 
 export async function analyzeImageWithGemini(base64ImageData: string): Promise<FoodItem[]> {
+  const API_KEY = process.env.API_KEY;
+
+  if (!API_KEY) {
+    throw new Error("Ключ API не настроен. Пожалуйста, добавьте переменную окружения API_KEY в настройках вашего Vercel проекта.");
+  }
+
+  const ai = new GoogleGenAI({ apiKey: API_KEY });
+
   const prompt = `Вы — эксперт-диетолог и ИИ для распознавания продуктов питания. Проанализируйте предоставленное изображение, на котором изображена тарелка с едой.
 Ваша задача:
 1. Определите каждый отдельный продукт на тарелке.
@@ -83,6 +83,6 @@ export async function analyzeImageWithGemini(base64ImageData: string): Promise<F
 
   } catch (error) {
     console.error("Error calling Gemini API:", error);
-    throw new Error("Failed to analyze image with Gemini API.");
+    throw new Error("Не удалось проанализировать изображение с помощью Gemini API.");
   }
 }
