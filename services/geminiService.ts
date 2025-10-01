@@ -1,45 +1,17 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI, Type } from '@google/genai';
 import { FoodItem } from '../types.ts';
 
-const responseSchema = {
-  type: Type.ARRAY,
-  items: {
-    type: Type.OBJECT,
-    properties: {
-      name: { 
-        type: Type.STRING,
-        description: "Название продукта питания"
-      },
-      calories: { 
-        type: Type.NUMBER,
-        description: "Расчетное количество калорий"
-      },
-      portion_grams: {
-        type: Type.NUMBER,
-        description: "Расчетный вес порции в граммах"
-      },
-    },
-    required: ['name', 'calories', 'portion_grams'],
-  },
-};
+// According to the guidelines, the API key must be sourced from process.env.API_KEY.
+// The execution environment is assumed to have this variable pre-configured.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export async function analyzeImageWithGemini(base64ImageData: string): Promise<FoodItem[]> {
-  // ВАЖНО: Вставьте свой API ключ сюда для тестирования.
-  // Не рекомендуется загружать этот ключ в публичный репозиторий.
-  const API_KEY = "AIzaSyBH1XuDp7tb_umOUWnzLnf3EN26bLl7cLQ";
-
-  if (API_KEY === "ВАШ_API_КЛЮЧ_ЗДЕСЬ") {
-    throw new Error("Пожалуйста, вставьте ваш настоящий Gemini API ключ в файл services/geminiService.ts");
-  }
-  
-  const ai = new GoogleGenAI({ apiKey: API_KEY });
-
   const prompt = `Вы — эксперт-диетолог и ИИ для распознавания продуктов питания. Проанализируйте предоставленное изображение, на котором изображена тарелка с едой.
 Ваша задача:
 1. Определите каждый отдельный продукт на тарелке.
 2. Для каждого продукта оцените его вес в граммах.
 3. Для каждого продукта оцените его калорийность в зависимости от размера порции.
-4. Предоставьте результат ТОЛЬКО в формате JSON. Не включайте никакого вступительного текста, объяснений или форматирования markdown, например \`\`\`json.
+4. Предоставьте результат ТОЛЬКО в формате JSON. Не включайте никакого вступительного текста, объяснений или форматирования markdown.
 Выходные данные JSON должны быть массивом объектов. Каждый объект в массиве должен представлять один продукт питания и должен иметь следующие три свойства и ничего больше:
 - "name": строка, представляющая название продукта.
 - "calories": число, представляющее расчетное общее количество калорий для этого продукта.
@@ -51,31 +23,46 @@ export async function analyzeImageWithGemini(base64ImageData: string): Promise<F
 ]
 Теперь проанализируйте предоставленное изображение и сгенерируйте ответ в формате JSON.`;
 
-  const imagePart = {
-    inlineData: {
-      mimeType: 'image/jpeg',
-      data: base64ImageData,
-    },
-  };
-
-  const textPart = {
-    text: prompt,
-  };
-
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
-      contents: { parts: [imagePart, textPart] },
+      contents: [{
+        parts: [
+          {
+            inlineData: {
+              mimeType: 'image/jpeg',
+              data: base64ImageData,
+            },
+          },
+          {
+            text: prompt,
+          }
+        ]
+      }],
       config: {
         responseMimeType: "application/json",
-        responseSchema: responseSchema,
-      }
+        responseSchema: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              name: { type: Type.STRING },
+              calories: { type: Type.NUMBER },
+              portion_grams: { type: Type.NUMBER },
+            },
+            required: ['name', 'calories', 'portion_grams'],
+          },
+        },
+      },
     });
 
-    const jsonText = response.text.trim();
-    const data = JSON.parse(jsonText);
+    const jsonText = response.text;
+    if (!jsonText) {
+      throw new Error("API response is empty.");
+    }
+    
+    const data = JSON.parse(jsonText.trim());
 
-    // Basic validation
     if (!Array.isArray(data)) {
       throw new Error("API response is not an array");
     }
@@ -84,6 +71,6 @@ export async function analyzeImageWithGemini(base64ImageData: string): Promise<F
 
   } catch (error) {
     console.error("Error calling Gemini API:", error);
-    throw new Error("Не удалось проанализировать изображение с помощью Gemini API.");
+    throw new Error("Не удалось проанализировать изображение. Пожалуйста, попробуйте еще раз.");
   }
 }
