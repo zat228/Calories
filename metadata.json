@@ -1,0 +1,7 @@
+{
+  "name": "Calorie Cam",
+  "description": "An application that uses your camera to identify food on a plate and calculates the total calories using AI.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
