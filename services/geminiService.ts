@@ -1,88 +1,34 @@
-
-import { GoogleGenAI, Type } from "@google/genai";
 import { FoodItem } from '../types';
 
-const responseSchema = {
-  type: Type.ARRAY,
-  items: {
-    type: Type.OBJECT,
-    properties: {
-      name: { 
-        type: Type.STRING,
-        description: "Название продукта питания"
-      },
-      calories: { 
-        type: Type.NUMBER,
-        description: "Расчетное количество калорий"
-      },
-      portion_grams: {
-        type: Type.NUMBER,
-        description: "Расчетный вес порции в граммах"
-      },
-    },
-    required: ['name', 'calories', 'portion_grams'],
-  },
-};
-
 export async function analyzeImageWithGemini(base64ImageData: string): Promise<FoodItem[]> {
-  const API_KEY = process.env.API_KEY;
-
-  if (!API_KEY) {
-    throw new Error("Ключ API не настроен. Пожалуйста, добавьте переменную окружения API_KEY в настройках вашего Vercel проекта.");
-  }
-
-  const ai = new GoogleGenAI({ apiKey: API_KEY });
-
-  const prompt = `Вы — эксперт-диетолог и ИИ для распознавания продуктов питания. Проанализируйте предоставленное изображение, на котором изображена тарелка с едой.
-Ваша задача:
-1. Определите каждый отдельный продукт на тарелке.
-2. Для каждого продукта оцените его вес в граммах.
-3. Для каждого продукта оцените его калорийность в зависимости от размера порции.
-4. Предоставьте результат ТОЛЬКО в формате JSON. Не включайте никакого вступительного текста, объяснений или форматирования markdown, например \`\`\`json.
-Выходные данные JSON должны быть массивом объектов. Каждый объект в массиве должен представлять один продукт питания и должен иметь следующие три свойства и ничего больше:
-- "name": строка, представляющая название продукта.
-- "calories": число, представляющее расчетное общее количество калорий для этого продукта.
-- "portion_grams": число, представляющее расчетный вес порции в граммах.
-Пример ответа для изображения с яблоком и бананом:
-[
-  {"name": "Яблоко", "calories": 95, "portion_grams": 180},
-  {"name": "Банан", "calories": 105, "portion_grams": 120}
-]
-Теперь проанализируйте предоставленное изображение и сгенерируйте ответ в формате JSON.`;
-
-  const imagePart = {
-    inlineData: {
-      mimeType: 'image/jpeg',
-      data: base64ImageData,
-    },
-  };
-
-  const textPart = {
-    text: prompt,
-  };
-
   try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: { parts: [imagePart, textPart] },
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: responseSchema,
-      }
+    const response = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ base64ImageData }),
     });
 
-    const jsonText = response.text.trim();
-    const data = JSON.parse(jsonText);
-
-    // Basic validation
-    if (!Array.isArray(data)) {
-      throw new Error("API response is not an array");
+    if (!response.ok) {
+      const errorData = await response.json();
+      // Use the server's error message if available, otherwise a generic one.
+      throw new Error(errorData.error || `Ошибка сервера: ${response.status}`);
     }
-    
+
+    const data = await response.json();
     return data as FoodItem[];
 
   } catch (error) {
-    console.error("Error calling Gemini API:", error);
-    throw new Error("Не удалось проанализировать изображение с помощью Gemini API.");
+    console.error("Error fetching from /api/analyze:", error);
+    // Re-throw a user-friendly error message.
+    if (error instanceof Error) {
+        // Avoid showing cryptic network errors like "Failed to fetch" directly.
+        if (error.message.includes('Failed to fetch')) {
+             throw new Error('Не удалось связаться с сервером анализа. Проверьте ваше интернет-соединение.');
+        }
+        throw new Error(error.message);
+    }
+    throw new Error("Произошла неизвестная ошибка при обращении к серверу.");
   }
 }
